@@ -1,5 +1,8 @@
 const { app, BrowserWindow } = require('electron')
 
+const { userDataPath } = require("./services/services.js")
+
+
 const path = require("path");
 
 const createWindow = () => {
@@ -8,8 +11,9 @@ const createWindow = () => {
     height: 600,
 	  //titleBarStyle : "hidden",
 	  webPreferences : {
-		  preload : path.join(__dirname, "preload.js")
-	  }
+		preload : path.join(__dirname, "preload.js"),
+	  },
+		
   })
 
   win.loadFile('./pages/index.html')
