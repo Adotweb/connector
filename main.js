@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require('electron')
 
 const { userDataPath } = require("./services/services.js")
 
+console.log(userDataPath)
 
 const path = require("path");
 

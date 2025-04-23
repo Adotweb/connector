@@ -9,5 +9,9 @@ contextBridge.exposeInMainWorld('versions', {
 
 contextBridge.exposeInMainWorld("services", {
 	create : (msg) => ipcRenderer.send("create", msg),
+
+
+	get_services : () => ipcRenderer.invoke("get_services"),
+
 	on_msg : (callback) => ipcRenderer.on("response", (_, data) => callback(data))	
 })

@@ -1,8 +1,8 @@
 const { app, ipcMain }  = require("electron");
+const { downloadRepo } = require("./download_repo");
 
 
 const userDataPath = app.getPath("userData");
-
 
 const services = new Map();
 
@@ -30,9 +30,25 @@ const service = {
 
 
 ipcMain.on("create", (event, data) => {
-	console.log(data)	
+	try {
+
+		const {owner, repo} = data
+
+		downloadRepo(owner, repo, data.branch || "master", userDataPath)	
+				
+
+	}catch(e){
+		console.log(e)
+	}
 })
-	
+
+
+ipcMain.handle("get_services", async () => {
+	return {
+		running : services, 
+		all : []
+	}
+})
 
 function create_service(service){
 
