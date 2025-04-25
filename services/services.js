@@ -36,12 +36,36 @@ ipcMain.on("create", (event, data) => {
 
 		downloadRepo(owner, repo, data.branch || "master", userDataPath)	
 				
-
+			
 	}catch(e){
 		console.log(e)
 	}
 })
 
+
+ipcMain.handle("create_service", async (ev, data) => {
+
+	console.log(data)
+
+	try {
+		const {owner, repo} = data;
+
+		
+
+		let ret = await downloadRepo(owner, repo, data.branch || "master", userDataPath)
+	
+		return {
+			success : true,
+			data : ret
+		}
+	} catch(e){
+		return {
+			success : true, 
+			error : e
+		}
+	}
+
+})
 
 ipcMain.handle("get_services", async () => {
 	return {

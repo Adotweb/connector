@@ -10,18 +10,19 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 
-function invoke(){
+async function invoke(){
 	console.log("hello")
 
 	let r = document.getElementById("repo").value;
 
 	let [owner, repo] = r.split("/").filter(s => s!= "")
 
-
-
-	services.create({
+	let value = await services.create_service({
 		owner, repo
-	});
+	})
+
+
+	console.log(value)
 }
 
 
@@ -31,7 +32,6 @@ function invoke(){
 
 setInterval(async () => {
 
-	console.log("hello")
 
 	let all_services = await services.get_services()
 

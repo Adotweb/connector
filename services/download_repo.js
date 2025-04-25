@@ -2,7 +2,7 @@ const axios = require('axios');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
 
-
+//function copied from chatgpt
 async function downloadRepo(owner, repo, branch = 'master', outputDir) {
   	const url = `https://github.com/${owner}/${repo}/archive/refs/heads/${branch}.zip`;
   	const zipPath = outputDir + "/current_download.zip"
@@ -24,7 +24,10 @@ async function downloadRepo(owner, repo, branch = 'master', outputDir) {
   	fs.unlinkSync(zipPath);
 
 
-	return true
+	return {
+		name : `${owner}/${repo}`,
+		path : outputDir
+	}
 }
 
 
