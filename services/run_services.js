@@ -18,6 +18,9 @@ function startProcess(service) {
 	}});
 
 
+	service.running = true;
+
+
   // Log output to console
   proc.stdout.on('data', (data) => {
 

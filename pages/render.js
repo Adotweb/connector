@@ -178,9 +178,11 @@ function toggle_service_creator_popup(){
 
 
 let service_popup_open = false;
-function toggle_service_dashboard(index){
+function toggle_service_dashboard(service_name){
 
-	let service = service_objects[index]	
+	let service = service_objects.get(service_name)
+
+	console.log(service)
 
 	service_popup_open = !service_popup_open;
 
@@ -214,17 +216,17 @@ function toggle_service_dashboard(index){
 							class="outline-none bg-gray-300 rounded-lg px-4 py-2 w-full"></textarea>	
 
 					
-					<button class="p-2 rounded-md border-2 border-black hover:bg-black hover:border-white hover:text-white transition duration-150 w-full font-bold"
-					onclick="run_cached_service(${index})">
-						Run Service
-					</button>	
+					
 
 					${
 						service.running ? `
 					<button class="p-2 rounded-md border-2 border-red-5000 hover:bg-red-500 hover:border-white hover:text-white transition duration-150 w-full font-bold"
-					onclick="services.stop_service(${service.service_name})">
+					onclick="stop_cached_service('${service_name}')">
 						Stop Service
-					</button>	` : ""
+					</button>	` : `<button class="p-2 rounded-md border-2 border-black hover:bg-black hover:border-white hover:text-white transition duration-150 w-full font-bold"
+					onclick="run_cached_service('${service_name}')">
+						Run Service
+					</button>`
 					}
 
 				</div>		
@@ -237,15 +239,18 @@ function toggle_service_dashboard(index){
 	
 }
 
-async function run_cached_service(index){
-	let service = service_objects[index];
+async function run_cached_service(service_name){
+	let service = service_objects.get(service_name);
 	console.log(service)
-	await services.run_service(service)
+	await services.run_service(service);
 }
 
+async function stop_cached_service(service_name){
+	let service = service_objects.get(service_name);
+	await services.stop_service(service);
+}
 
-
-let service_objects = [];
+let service_objects = new Map();
 
 
 //we poll the status over time so we are updated (event based is not needed here)
@@ -262,12 +267,24 @@ setInterval(async () => {
 		let logs = document.getElementById(service.service_name + "-logs")
 
 		if(logs){
-			logs.innerHTML = service.logs;			
+			//updates the logs
+			logs.innerHTML = service.logs;		
+			
+			//checks if the running state is the same as before, if it isnt we update (reopen) the dashboard
+			if(service.running != service_objects.get(service.service_name).running)	{
+
+
+				//reopens the dashboard so that we can see if it runs etc.
+				toggle_service_dashboard(service.service_name)
+				toggle_service_dashboard(service.service_name)
+			}
+
+
 		}
 
 		//for all objects we already have we check if they have changed and if they have modify them, if not we return and move on
-		if(index < service_objects.length){
-			if(JSON.stringify(service_objects[index]) == JSON.stringify(service)){
+		if(service_objects.has(service.service_name)){
+			if(JSON.stringify(service_objects.get(service.service_name)) == JSON.stringify(service)){
 				return	
 			}else{
 				let service_object = document.getElementById(service.service_name);
@@ -285,7 +302,7 @@ setInterval(async () => {
 
 						<div class="flex p-4">
 
-							<button onclick="toggle_service_dashboard(${index})" 
+							<button onclick="toggle_service_dashboard('${service.service_name}')" 
 							class="bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
 							p-1 font-bold text-lg rounded">
 				
@@ -322,7 +339,7 @@ setInterval(async () => {
 
 				<div class="flex p-4">
 
-					<button onclick="toggle_service_dashboard(${index})" 
+					<button onclick="toggle_service_dashboard('${service.service_name}')" 
 						class="bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
 						p-1 font-bold text-lg rounded">
 				
@@ -338,6 +355,6 @@ setInterval(async () => {
 		`
 		
 	})
-
-	service_objects = all_services
+	
+	all_services.forEach((service) => service_objects.set(service.service_name, service))
 }, 1_000)
