@@ -62,8 +62,12 @@ async function create_service(){
 	let [owner, repo] = github_url.split("/").filter(s => s!= "")
 
 	let inward_port = document.getElementById("inward_port").value;
-	let start_command = document.getElementById("start_command").value;
-	let env_command = document.getElementById("env_variables").value;
+	let start_command = document.getElementById("start_command").value.replaceAll("\n+", "&&").replaceAll("\s+", " ");
+	let env = {}; 
+	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
+		console.log(key, value);
+		env[key] = value;	
+	});
 
 	let github_check = await fetch("https://github.com/" + github_url).then(res => {
 		console.log(res.status)
@@ -100,7 +104,7 @@ async function create_service(){
 		github_url,
 		inward_port,
 		outward_id : Math.random() * 10_000_000,
-		env : env_command
+		env 
 	})
 }
 
@@ -181,6 +185,8 @@ function toggle_service_dashboard(index){
 	service_popup_open = !service_popup_open;
 
 	let popup = document.getElementById("popup")
+
+
 	if(service_popup_open){
 
 
@@ -196,7 +202,7 @@ function toggle_service_dashboard(index){
 					<div class="title font-bold text-xl">${service.service_name}</div>
 					<div class="status font-bold text-lg">Status : ${service.running ? "Running" : "Stopped"}</div>
 					<div class="port font-bold text-lg">Inward Port : ${service.inward_port}</div>
-					<div class="port font-bold text-lg">Environment : ${service.env}</div>
+			<div class="port font-bold text-lg">Environment Variables : ${Object.entries(service.env).map(([key, value]) => `<div>${key} : ${value}</div>`)}</div>
 					<div class="port font-bold text-lg">Start Command : ${service.run_command}</div>
 				
 					<div class="logs-text text-lg">Logs</div>
@@ -212,6 +218,14 @@ function toggle_service_dashboard(index){
 					onclick="run_cached_service(${index})">
 						Run Service
 					</button>	
+
+					${
+						service.running ? `
+					<button class="p-2 rounded-md border-2 border-red-5000 hover:bg-red-500 hover:border-white hover:text-white transition duration-150 w-full font-bold"
+					onclick="services.stop_service(${service.service_name})">
+						Stop Service
+					</button>	` : ""
+					}
 
 				</div>		
 			</div>
@@ -314,6 +328,7 @@ setInterval(async () => {
 				
 						Service Dashboard
 					</button>
+
 
 				</div>	
 

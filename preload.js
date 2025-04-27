@@ -11,7 +11,8 @@ contextBridge.exposeInMainWorld("services", {
 	download_repo : (msg) => ipcRenderer.invoke("download_repo", msg),
 	run_service : (msg) => ipcRenderer.invoke("run_service", msg),
 	run_new_service : (msg) => ipcRenderer.invoke("run_new_service", msg),
-	get_services : () => ipcRenderer.invoke("get_services"),
+	stop_service : (msg) => ipcRenderer.invoke("stop_service", msg),
 
+	get_services : () => ipcRenderer.invoke("get_services"),
 	
 })

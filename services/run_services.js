@@ -10,9 +10,12 @@ const processes = new Map();
 
 // Start a process
 function startProcess(service) {
-	const {run_command, path, service_name : name} = service	
+	const {run_command, path, service_name : name, env} = service	
   
-	const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true });
+	const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true , env : {
+		...process.env,
+		...env
+	}});
 
 
   // Log output to console
@@ -32,6 +35,9 @@ function startProcess(service) {
 	  services.get(name).running = false
     processes.delete(name); // Clean up if needed
   });
+
+
+	
 
   // Store the process
   processes.set(name, proc);
