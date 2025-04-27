@@ -150,9 +150,12 @@ ipcMain.handle("edit_service", async (ev, data) => {
 
 		stopProcess(service_name)
 			
-	
+
+		//we need to wait a bit until all the cleanup is done
 		//then we restart the process (this time it has the new information)
-		startProcess(data)
+		setTimeout(() => startProcess(data), 1_000)
+
+
 
 
 		return {

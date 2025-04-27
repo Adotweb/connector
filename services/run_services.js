@@ -33,6 +33,9 @@ function startProcess(service) {
 
   proc.on('close', (code) => {
 
+	  if(services.has(name)){
+	  	services.get(name).running = false
+	  }
 
     processes.delete(name); // Clean up if needed
   });
