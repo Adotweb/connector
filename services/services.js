@@ -125,10 +125,11 @@ ipcMain.handle("delete_service", async (ev, data) => {
 		//first we stop the processes
 
 		stopProcess(service_name)
+		
+
 		//then we remove from the services list
 		services.delete(service_name)
 			
-
 		return {
 			success : true
 		}

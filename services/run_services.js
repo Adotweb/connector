@@ -35,7 +35,11 @@ function startProcess(service) {
 
   proc.on('close', (code) => {
     console.log(`[${name}] exited with code ${code}`);
-	  services.get(name).running = false
+
+	  if(services.has(name)){
+	  	services.get(name).running = false
+	  }
+
     processes.delete(name); // Clean up if needed
   });
 

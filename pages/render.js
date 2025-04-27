@@ -114,10 +114,23 @@ async function create_service(){
 }
 
 
+async function delete_cached_service(service_name){
+	let result = await services.delete_service(service_objects.get(service_name))
+	toggle_service_dashboard(service_name);
+}
+
+
+async function edit_cached_service(service_name){
+	toggle_service_dashboard(service_name)
+	let result = await services.delete_service(service_objects.get(service_name))
+	toggle_service_creator_popup(service_objects.get(service_name))
+}
 
 
 let popup_open = false;
-function toggle_service_creator_popup(){
+function toggle_service_creator_popup(editing_service){
+
+	
 	popup_open = !popup_open;
 
 	let popup = document.getElementById("popup")
@@ -173,6 +186,18 @@ function toggle_service_creator_popup(){
 				</div>		
 			</div>
 		`
+
+
+		//if we are editing we use the preset 
+		if(editing_service){
+			document.getElementById("service_name").value = editing_service.service_name 
+			document.getElementById("github_url").value = editing_service.github_url 
+			document.getElementById("inward_port").value = editing_service.inward_port 
+			document.getElementById("start_command").value = editing_service.run_command
+			document.getElementById("env_variables").value = Object.entries(editing_service.env).map(([key, value]) => `${key}=${value}`).join("\n")
+
+						
+		}
 	}else{
 		popup.outerHTML = `<div class="hidden" id="popup"></div>`		
 	}
@@ -275,6 +300,16 @@ setInterval(async () => {
 
 	let all_services = await services.get_services()
 
+	//the deleted ones are those that do not come with the all_services call
+	
+	
+	let deleted = [...service_objects.keys()].filter(name => !all_services.map(service => service.service_name).includes(name))
+
+	deleted.forEach(name => {
+		service_objects.delete(name)
+		document.getElementById(name).outerHTML = ""
+	})
+	
 	let service_list = document.getElementById("service-list")	
 	
 	all_services.forEach((service, index) => {
@@ -337,6 +372,8 @@ setInterval(async () => {
 		service_object.outerHTML = element
 				
 	})
+
+
 	
 	all_services.forEach((service) => service_objects.set(service.service_name, service))
 }, 1_000)
