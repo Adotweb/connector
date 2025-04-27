@@ -104,7 +104,7 @@ ipcMain.handle("run_service", async (ev, data) => {
 ipcMain.handle("stop_service", async (ev, data) => {
 	try {
 		const {service_name} = data;
-
+		
 		stopProcess(service_name);
 	
 		return {
