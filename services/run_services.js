@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-
+const kill = require("tree-kill")
 //most of this is copied from chatgpt
 
 //a map to store services (things that hold information about processes)
@@ -53,7 +53,9 @@ function stopProcess(name) {
   const proc = processes.get(name);
   if (proc) {
 	  services.get(name).running = false
-    proc.kill();
+	
+	  kill(proc.pid)
+
     processes.delete(name);
     console.log(`[${name}] process killed`);
   } else {

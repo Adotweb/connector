@@ -23,7 +23,8 @@
   "homepage": "https://github.com/Adotweb/connector#readme",
   "dependencies": {
     "adm-zip": "^0.5.16",
-    "axios": "^1.8.4"
+    "axios": "^1.8.4",
+    "tree-kill": "^1.2.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",
