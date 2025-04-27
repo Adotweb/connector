@@ -149,21 +149,22 @@ ipcMain.handle("edit_service", async (ev, data) => {
 		//first we stop the processes
 
 		stopProcess(service_name)
-		//then we remove from the services list
-		services.set(service_name, data)
-
+			
+	
 		//then we restart the process (this time it has the new information)
 		startProcess(data)
+
 
 		return {
 			success : true
 		}
 	}catch(e){
+		console.log(e)
 		return {
 			success: false,
 			error : "" + e
 		}
-	}
+	} 
 })
 
 

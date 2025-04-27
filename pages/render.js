@@ -4,28 +4,6 @@ document.addEventListener("DOMContentLoaded", e => {
 })
 
 
-//this function is used to display the data from the backend not to create a new service 
-function create_service_module({
-	service_name,
-	path,	
-	running,
-	env,
-	github_url,		
-	run_command,
-	inward_port,	
-	outward_id}){
-
-	let service_card = document.createElement("div");
-
-	div.outerHTML = `
-		<div class="">
-			
-		</div>
-	`
-
-}
-
-
 function create_success_status_message(msg){
 	let message = document.createElement("div")
 	document.getElementById("status_window").appendChild(message)
@@ -66,7 +44,7 @@ async function create_service(){
 	let [owner, repo] = github_url.split("/").filter(s => s!= "")
 
 	let inward_port = document.getElementById("inward_port").value;
-	let start_command = document.getElementById("start_command").value.replaceAll("\n+", "&&").replaceAll("\s+", " ");
+	let start_command = document.getElementById("start_command").value.replaceAll("\n*", "&&").replaceAll("\s+", " ");
 	let env = {}; 
 	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
 		env[key] = value;	
@@ -113,6 +91,77 @@ async function create_service(){
 	toggle_service_creator_popup()
 }
 
+//works similar to create_service but instead edits the provided reference
+async function edit_service(service_ref){
+
+	let button = document.getElementById("create-button")
+	button.innerHTML = "..."
+	button.onclick = () => {}
+
+	let service_name = document.getElementById("service_name").value;
+	let github_url = document.getElementById("github_url").value;
+
+	//split into owner and repo 
+	let [owner, repo] = github_url.split("/").filter(s => s!= "")
+
+	let inward_port = document.getElementById("inward_port").value;
+	let start_command = document.getElementById("start_command").value.replaceAll("\n*", "&&").replaceAll("\s+", " ");
+	let env = {}; 
+	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
+		env[key] = value;	
+	});
+
+	let github_check = await fetch("https://github.com/" + github_url).then(res => {
+		if(res.status == 404){
+			return res.status
+		}
+		return res.text()
+	})
+	//this means that the specified repo does not exist
+	if(github_check == 404){
+		create_error_status_message(`the repo ${github_url} does not exist`)		
+		return
+	}
+
+
+	create_success_status_message(`found repo ${github_url}`)		
+
+	let { success, data } = await services.download_repo({owner, repo})
+	
+
+	if(!success){
+		create_error_status_message("something went wrong with this repo")
+		return
+	}
+
+	let {path} = data
+
+	create_success_status_message(`successfully installed ${github_url}`)
+
+
+
+	let {success : new_success, data : new_data} = await services.edit_service({
+		//we provide the reference here
+		service_name : service_ref,
+		path, 
+
+		//the name cannot be changed
+		name : service_ref, 
+		run_command : start_command,
+		github_url,
+		inward_port,
+		env, 
+
+		//copy the old logs and outward id
+		logs : service_objects.get(service_ref).logs,
+		outward_id : service_objects.get(service_ref).outward_id,
+	})
+
+	//after all of this we are done
+	toggle_service_creator_popup()
+}
+
+
 
 async function delete_cached_service(service_name){
 	let result = await services.delete_service(service_objects.get(service_name))
@@ -122,7 +171,6 @@ async function delete_cached_service(service_name){
 
 async function edit_cached_service(service_name){
 	toggle_service_dashboard(service_name)
-	let result = await services.delete_service(service_objects.get(service_name))
 	toggle_service_creator_popup(service_objects.get(service_name))
 }
 
@@ -172,7 +220,7 @@ function toggle_service_creator_popup(editing_service){
 
 
 							<button id="create-button" class="p-2 rounded-md border-2 border-black hover:bg-black hover:border-white hover:text-white transition duration-150 w-full font-bold"
-							onclick="create_service()">
+							onclick="${editing_service ? `edit_service('${editing_service.service_name}')` : 'create_service()'}">
 								Create Service
 							</button>	
 
@@ -195,7 +243,7 @@ function toggle_service_creator_popup(editing_service){
 			document.getElementById("inward_port").value = editing_service.inward_port 
 			document.getElementById("start_command").value = editing_service.run_command
 			document.getElementById("env_variables").value = Object.entries(editing_service.env).map(([key, value]) => `${key}=${value}`).join("\n")
-
+			
 						
 		}
 	}else{
@@ -300,6 +348,8 @@ setInterval(async () => {
 
 	let all_services = await services.get_services()
 
+	console.log(all_services)
+	
 	//the deleted ones are those that do not come with the all_services call
 	
 	

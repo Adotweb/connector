@@ -25,20 +25,14 @@ function startProcess(service) {
   proc.stdout.on('data', (data) => {
 
 	  services.get(name).logs += `\n[${new Date().toUTCString()}] ${data}`
-		console.log(`\n[${new Date().toUTCString()}] ${data}`)
   });
 
   proc.stderr.on('data', (data) => {
 	  services.get(name).logs += `\n[${new Date().toUTCString()}, error] ${data}`
-		console.error(`\n[${new Date().toUTCString()}] ${data}`)
   });
 
   proc.on('close', (code) => {
-    console.log(`[${name}] exited with code ${code}`);
 
-	  if(services.has(name)){
-	  	services.get(name).running = false
-	  }
 
     processes.delete(name); // Clean up if needed
   });
