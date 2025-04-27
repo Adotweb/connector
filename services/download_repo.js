@@ -26,7 +26,7 @@ async function downloadRepo(owner, repo, branch = 'master', outputDir) {
 
 	return {
 		name : `${owner}/${repo}`,
-		path : outputDir
+		path : outputDir + repo + "-" + branch
 	}
 }
 
