@@ -11,10 +11,9 @@ const processes = new Map();
 // Start a process
 function startProcess(service) {
 	const {run_command, path, service_name : name} = service	
-	console.log(service, service.path)
-  const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true });
+  
+	const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true });
 
-	console.log(proc)
 
   // Log output to console
   proc.stdout.on('data', (data) => {

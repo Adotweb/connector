@@ -51,8 +51,7 @@ ipcMain.handle("download_repo", async (ev, data) => {
 
 //this method creates a config file so we can rerun the configuration once we have an error or similar
 //ipcMain.handle("create_service_config", async)
-
-ipcMain.handle("run_service", async (ev, data) => {
+ipcMain.handle("run_new_service", async (ev, data) => {
 	try {
 		const {name, path, command, github_url, inward_port, env, outward_id} = data;
 	
@@ -66,9 +65,29 @@ ipcMain.handle("run_service", async (ev, data) => {
 		new_service_obj.env = env;
 		new_service_obj.running = true
 		new_service_obj.outward_id = outward_id;
+		new_service_obj.logs = "";
 
-		console.log(new_service_obj)
 		startProcess(new_service_obj);
+	
+		return {
+			success : true
+		}
+	}catch(e){
+		console.log(e)
+		return {
+			success: false,
+			error : "" + e
+		}
+	}
+})
+
+//almost the same as above, with the difference that we can run services that already are cached
+ipcMain.handle("run_service", async (ev, data) => {
+	try {
+		const cached_service = data;
+	
+
+		startProcess(cached_service);
 	
 		return {
 			success : true
