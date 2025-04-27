@@ -1,8 +1,12 @@
+let host_id;
+
 document.addEventListener("DOMContentLoaded", async e => {
 
 	//toggle_service_creator_popup()
 	
-	document.getElementById("host_id").innerHTML = await host.get_host_id();
+	host_id = await host.get_host_id();	
+
+	document.getElementById("host_id").innerHTML = host_id; 
 })
 
 
@@ -342,6 +346,13 @@ async function stop_cached_service(service_name){
 	toggle_service_dashboard(service_name)
 }
 
+
+//this opens stuff in the regular browser
+function copy_to_clipboard(link){
+	console.log(link)
+	host.copy_to_clipboard(link)	
+}
+
 let service_objects = new Map();
 
 
@@ -374,7 +385,10 @@ setInterval(async () => {
 					</div>
 				<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
 					
-				<div class="flex">URL : <div class="font-bold text-green-400 ml-2"><a href="https://neptunapp.connector/${service.outward_id}">https://neptunapp.connector/${service.outward_id}</a></div></div>
+				<div class="flex">URL : 
+		<div class="font-bold text-green-400 ml-2">http://localhost:3500/${host_id}/${service.service_name}</div>
+
+			</div>
 					
 				</div>
 

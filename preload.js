@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer, shell, clipboard } = require('electron')
 
 contextBridge.exposeInMainWorld('versions', {
   node: () => process.versions.node,
@@ -20,5 +20,6 @@ contextBridge.exposeInMainWorld("services", {
 })
 
 contextBridge.exposeInMainWorld("host", {
-	get_host_id : () => ipcRenderer.invoke("get_host_id")
+	get_host_id : () => ipcRenderer.invoke("get_host_id"),
+	
 })

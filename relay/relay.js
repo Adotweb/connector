@@ -2,7 +2,13 @@ const { WebSocket } = require("ws");
 const { ipcMain } = require("electron");
 const { services } = require("../services/run_services");
 
-const host_id = require("crypto").randomUUID();
+const { uniqueNamesGenerator, adjectives, colors, animals} = require("unique-names-generator")
+
+const host_id = uniqueNamesGenerator({
+	dictionaries : [adjectives, colors, animals],
+	length : 2
+});
+
 
 ipcMain.handle("get_host_id", async () => {
 	return host_id
@@ -54,7 +60,6 @@ async function fetchFromRequest(req, baseUrl = '') {
 	//selbst geschrieben
 	let service_name = req.url.split("/")[1];
 
-	console.log(service_name, services)
 
 
 	let inward_port = services.get(service_name).inward_port;
@@ -87,17 +92,35 @@ async function fetchFromRequest(req, baseUrl = '') {
     method: req.method,
     headers,
     body,
-  });
+  })
+	
+	let ret;
+	// Check the content type
+	const contentType = response.headers.get('content-type');
 
-  return response;
+	if (contentType.includes('application/json')) {
+    		ret = await response.json();
+	} else if (contentType.includes('text/plain')) {
+    		ret = await response.text();
+	} else if (contentType.includes('text/html')) {
+    		ret = await response.text();
+	} else if (contentType.includes('application/octet-stream')) {
+    		ret = await response.blob();
+	} else {
+  		return response;
+	}
+	return ret
+
 }
 
-function handle_rest(socket, message, request_id){
+async function handle_rest(socket, message, request_id){
 
 	let body = message.body;
 
 
-	let response = fetchFromRequest(body);
+	let response = await fetchFromRequest(body);
+
+	console.log(response)
 
 	socket.send(JSON.stringify({
 		sender : "host",

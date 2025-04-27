@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, shell, ipcMain } = require('electron')
 
+const { uniqueNamesGenerator, adjectives, colors, animals} = require("unique-names-generator")
 
 const fs = require("fs")
 const { userDataPath } = require("./services/services.js")
@@ -36,6 +37,7 @@ const createWindow = () => {
 	  },
 		
   })
+
 
   win.loadFile('./pages/index.html')
 }
