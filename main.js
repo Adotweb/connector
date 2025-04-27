@@ -6,7 +6,7 @@ const { userDataPath } = require("./services/services.js")
 
 const path = require("path");
 const { start_ws } = require('./relay/relay.js');
-const { services } = require('./services/run_services.js');
+const { services, processes, stopProcess } = require('./services/run_services.js');
 
 
 //check if app folders are already created (so we dont get any conflicts later)
@@ -44,6 +44,10 @@ const createWindow = () => {
 app.on("will-quit", () => {
 
 	let file = JSON.stringify([...services.values()])
+
+	//this runs cleanup
+	let process_names = [...processes.keys()]
+	process_names.forEach(p => stopProcess(p))
 
 	console.log(file)
 	
