@@ -16,7 +16,7 @@ ipcMain.handle("get_host_id", async () => {
 
 function start_ws(){
 
-let ws = new WebSocket("http://localhost:3500");
+let ws = new WebSocket("https://connector.neptunapp.org/");
 
 
 

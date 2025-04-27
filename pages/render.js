@@ -386,7 +386,7 @@ setInterval(async () => {
 				<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
 					
 				<div class="flex">URL : 
-		<div class="font-bold text-green-400 ml-2">http://localhost:3500/${host_id}/${service.service_name}</div>
+		<div class="font-bold text-green-400 ml-2">https://connector.neptunapp.org/${host_id}/${service.service_name}</div>
 
 			</div>
 					
