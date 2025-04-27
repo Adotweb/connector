@@ -118,6 +118,53 @@ ipcMain.handle("stop_service", async (ev, data) => {
 	}
 })
 
+ipcMain.handle("delete_service", async (ev, data) => {
+	try {
+		const {service_name} = data;
+		
+		//first we stop the processes
+
+		stopProcess(service_name)
+		//then we remove from the services list
+		services.delete(service_name)
+			
+
+		return {
+			success : true
+		}
+	}catch(e){
+		return {
+			success: false,
+			error : "" + e
+		}
+	}
+})
+
+ipcMain.handle("edit_service", async (ev, data) => {
+	try {
+		//data comes with all the new service information here
+		const {service_name} = data;
+		
+		//first we stop the processes
+
+		stopProcess(service_name)
+		//then we remove from the services list
+		services.set(service_name, data)
+
+		//then we restart the process (this time it has the new information)
+		startProcess(data)
+
+		return {
+			success : true
+		}
+	}catch(e){
+		return {
+			success: false,
+			error : "" + e
+		}
+	}
+})
+
 
 ipcMain.handle("get_services", async () => {
 	return [...services.values()]

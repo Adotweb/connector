@@ -54,7 +54,11 @@ function create_error_status_message(msg){
 
 //this is the method that actually creates the service, but first it checks if the things mentioned even make sense (i.e. if the github url is valied etc.)
 async function create_service(){
-	
+
+	let button = document.getElementById("create-button")
+	button.innerHTML = "..."
+	button.onclick = () => {}
+
 	let service_name = document.getElementById("service_name").value;
 	let github_url = document.getElementById("github_url").value;
 
@@ -65,12 +69,10 @@ async function create_service(){
 	let start_command = document.getElementById("start_command").value.replaceAll("\n+", "&&").replaceAll("\s+", " ");
 	let env = {}; 
 	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
-		console.log(key, value);
 		env[key] = value;	
 	});
 
 	let github_check = await fetch("https://github.com/" + github_url).then(res => {
-		console.log(res.status)
 		if(res.status == 404){
 			return res.status
 		}
@@ -106,6 +108,9 @@ async function create_service(){
 		outward_id : Math.random() * 10_000_000,
 		env 
 	})
+
+	//after all of this we are done
+	toggle_service_creator_popup()
 }
 
 
@@ -153,7 +158,7 @@ function toggle_service_creator_popup(){
 
 
 
-							<button class="p-2 rounded-md border-2 border-black hover:bg-black hover:border-white hover:text-white transition duration-150 w-full font-bold"
+							<button id="create-button" class="p-2 rounded-md border-2 border-black hover:bg-black hover:border-white hover:text-white transition duration-150 w-full font-bold"
 							onclick="create_service()">
 								Create Service
 							</button>	
@@ -182,7 +187,6 @@ function toggle_service_dashboard(service_name){
 
 	let service = service_objects.get(service_name)
 
-	console.log(service)
 
 	service_popup_open = !service_popup_open;
 
@@ -229,6 +233,18 @@ function toggle_service_dashboard(service_name){
 					</button>`
 					}
 
+					<button class="p-2 rounded-md border-2 border-red-500 hover:bg-red-500 hover:border-white hover:text-white transition duration-150 w-full font-bold"
+					onclick="delete_cached_service('${service_name}')">
+						Delete
+					</button>
+
+					<button class="p-2 rounded-md border-2 border-yellow-500 hover:bg-yellow-500 hover:border-white hover:text-white transition duration-150 w-full font-bold"
+					onclick="edit_cached_service('${service_name}')">
+						Edit
+					</button>
+
+
+
 				</div>		
 			</div>
 		`
@@ -241,13 +257,14 @@ function toggle_service_dashboard(service_name){
 
 async function run_cached_service(service_name){
 	let service = service_objects.get(service_name);
-	console.log(service)
 	await services.run_service(service);
+	toggle_service_dashboard(service_name)
 }
 
 async function stop_cached_service(service_name){
 	let service = service_objects.get(service_name);
 	await services.stop_service(service);
+	toggle_service_dashboard(service_name)
 }
 
 let service_objects = new Map();
@@ -262,46 +279,19 @@ setInterval(async () => {
 	
 	all_services.forEach((service, index) => {
 
-		//we update the logs of the current thing were vewing (if it exists)
-
-		let logs = document.getElementById(service.service_name + "-logs")
-
-		if(logs){
-			//updates the logs
-			logs.innerHTML = service.logs;		
-			
-			//checks if the running state is the same as before, if it isnt we update (reopen) the dashboard
-			if(service.running != service_objects.get(service.service_name).running)	{
-
-
-				//reopens the dashboard so that we can see if it runs etc.
-				toggle_service_dashboard(service.service_name)
-				toggle_service_dashboard(service.service_name)
-			}
-
-
-		}
-
-		//for all objects we already have we check if they have changed and if they have modify them, if not we return and move on
-		if(service_objects.has(service.service_name)){
-			if(JSON.stringify(service_objects.get(service.service_name)) == JSON.stringify(service)){
-				return	
-			}else{
-				let service_object = document.getElementById(service.service_name);
-				service_object.outerHTML = `
-					<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4 ">				
-						<div class="title text-xl font-bold">${service.service_name}</div>
-						<div class="content  text-lg flex flex-col items-center p-4">
-							<div class="flex">Status : ${service.running ? `<div class="font-bold text-green-400 ml-2">running</div>` : `<div class="font-bold text-red-400 ml-2">stopped</div>`}
-						</div>
-						<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
+		let element = `
+			<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4 ">				
+				<div class="title text-xl font-bold">${service.service_name}</div>
+				<div class="content  text-lg flex flex-col items-center p-4">
+					<div class="flex">Status : ${service.running ? `<div class="font-bold text-green-400 ml-2">running</div>` : `<div class="font-bold text-red-400 ml-2">stopped</div>`}
+					</div>
+				<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
 					
-						<div class="flex">URL : <div class="font-bold text-green-400 ml-2"><a href="https://neptunapp.connector/${service.outward_id}">https://neptunapp.connector/${service.outward_id}</a></div></div>
+				<div class="flex">URL : <div class="font-bold text-green-400 ml-2"><a href="https://neptunapp.connector/${service.outward_id}">https://neptunapp.connector/${service.outward_id}</a></div></div>
 					
-						</div>
+				</div>
 
-						<div class="flex p-4">
-
+				<div class="flex p-4">
 							<button onclick="toggle_service_dashboard('${service.service_name}')" 
 							class="bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
 							p-1 font-bold text-lg rounded">
@@ -316,6 +306,25 @@ setInterval(async () => {
 
 		`
 
+
+		//we update the logs of the current thing were vewing (if it exists)
+
+		let logs = document.getElementById(service.service_name + "-logs")
+
+		if(logs){
+			//updates the logs
+			logs.innerHTML = service.logs;		
+			
+
+		}
+
+		//for all objects we already have we check if they have changed and if they have modify them, if not we return and move on
+		if(service_objects.has(service.service_name)){
+			if(JSON.stringify(service_objects.get(service.service_name)) == JSON.stringify(service)){
+				return	
+			}else{
+				let service_object = document.getElementById(service.service_name);
+				service_object.outerHTML = element
 				return
 
 			}
@@ -325,35 +334,8 @@ setInterval(async () => {
 		let service_object = document.createElement("div");
 		service_list.appendChild(service_object);
 
-		service_object.outerHTML = `
-			<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4 ">				
-				<div class="title text-xl font-bold">${service.service_name}</div>
-				<div class="content  text-lg flex flex-col items-center p-4">
-			<div class="flex">Status : ${service.running ? `<div class="font-bold text-green-400 ml-2">running</div>` : `<div class="font-bold text-red-400 ml-2">stopped</div>`}
-							</div>
-					<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
-					
-					<div class="flex">URL : <div class="font-bold text-green-400 ml-2"><a href="https://neptunapp.connector/${service.outward_id}">https://neptunapp.connector/${service.outward_id}</a></div></div>
-					
-				</div>
-
-				<div class="flex p-4">
-
-					<button onclick="toggle_service_dashboard('${service.service_name}')" 
-						class="bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
-						p-1 font-bold text-lg rounded">
+		service_object.outerHTML = element
 				
-						Service Dashboard
-					</button>
-
-
-				</div>	
-
-			</div>	
-
-
-		`
-		
 	})
 	
 	all_services.forEach((service) => service_objects.set(service.service_name, service))
