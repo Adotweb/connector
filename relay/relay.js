@@ -120,7 +120,6 @@ async function handle_rest(socket, message, request_id){
 
 	let response = await fetchFromRequest(body);
 
-	console.log(response)
 
 	socket.send(JSON.stringify({
 		sender : "host",
