@@ -18,3 +18,7 @@ contextBridge.exposeInMainWorld("services", {
 	get_services : () => ipcRenderer.invoke("get_services"),
 	
 })
+
+contextBridge.exposeInMainWorld("host", {
+	get_host_id : () => ipcRenderer.invoke("get_host_id")
+})

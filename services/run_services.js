@@ -1,9 +1,25 @@
 const { spawn } = require('child_process');
 const kill = require("tree-kill")
+
+const fs = require("fs")
+const path = require("path");
+const { app } = require('electron');
 //most of this is copied from chatgpt
 
 //a map to store services (things that hold information about processes)
 const services = new Map()
+
+try {
+	let userDataPath = app.getPath("userData");
+	let file = JSON.parse(fs.readFileSync(path.join(userDataPath, "services", "services.json"), "utf8"))
+	
+	file.forEach(service => {
+		services.set(service.service_name, service)
+	})
+
+}catch(e){
+	console.log(e)	
+}
 
 // A Map to store processes
 const processes = new Map();

@@ -1,6 +1,8 @@
-document.addEventListener("DOMContentLoaded", e => {
+document.addEventListener("DOMContentLoaded", async e => {
 
 	//toggle_service_creator_popup()
+	
+	document.getElementById("host_id").innerHTML = await host.get_host_id();
 })
 
 

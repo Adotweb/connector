@@ -24,7 +24,8 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "axios": "^1.8.4",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",

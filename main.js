@@ -1,9 +1,12 @@
 const { app, BrowserWindow } = require('electron')
 
+
 const fs = require("fs")
 const { userDataPath } = require("./services/services.js")
 
 const path = require("path");
+const { start_ws } = require('./relay/relay.js');
+const { services } = require('./services/run_services.js');
 
 
 //check if app folders are already created (so we dont get any conflicts later)
@@ -37,7 +40,21 @@ const createWindow = () => {
   win.loadFile('./pages/index.html')
 }
 
+
+app.on("will-quit", () => {
+
+	let file = JSON.stringify([...services.values()])
+
+	console.log(file)
+	
+	fs.writeFileSync(path.join(userDataPath, "services", "services.json"), file, "utf8")
+
+})
+
 app.whenReady().then(() => {
+
+	start_ws()
+
 	check_app_folders()
   	createWindow()
 })
