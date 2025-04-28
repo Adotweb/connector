@@ -32,7 +32,10 @@ const processes = new Map();
 function startProcess(service) {
 	let {run_command, path, service_name : name, env} = service	
 
+	//we replace all \n with && again just to be sure
+	run_command = run_command.replaceAll(/\n+/g, "&&");
 
+	console.log(run_command)
 	//this actually runs the command, we provide the path where the repo we installed is at, the command we run
 	//and the environment variables
 	const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true , env : {
