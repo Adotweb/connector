@@ -68,6 +68,8 @@ function startProcess(service) {
 // Kill a process
 function stopProcess(name) {
   const proc = processes.get(name);
+	console.log(proc.pid, name, services.get(name))
+
   if (proc) {
 	  services.get(name).running = false
 	

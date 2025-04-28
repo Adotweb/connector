@@ -43,18 +43,26 @@ const createWindow = () => {
 }
 
 
-app.on("will-quit", () => {
-
-	let file = JSON.stringify([...services.values()])
+app.on("before-quit", (e) => {
+	e.preventDefault()	
 
 	//this runs cleanup
 	let process_names = [...processes.keys()]
-	process_names.forEach(p => stopProcess(p))
+	process_names.forEach(p => {
+		console.log(p)
+		stopProcess(p)
+	})
 
-	console.log(file)
-	
-	fs.writeFileSync(path.join(userDataPath, "services", "services.json"), file, "utf8")
+	//we wait a bit so that cleanup is clean
+	setTimeout(() => {
+		console.log(processes)
 
+		let file = JSON.stringify([...services.values()])
+		console.log(file)
+		fs.writeFileSync(path.join(userDataPath, "services", "services.json"), file, "utf8")
+
+		app.exit()
+	}, 1000)
 })
 
 app.whenReady().then(() => {
