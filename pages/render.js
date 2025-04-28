@@ -50,7 +50,8 @@ async function create_service(){
 	let [owner, repo] = github_url.split("/").filter(s => s!= "")
 
 	let inward_port = document.getElementById("inward_port").value;
-	let start_command = document.getElementById("start_command").value.replaceAll("\n*", "&&").replaceAll("\s+", " ");
+	//in the start command we replace all newlines with && so that commands are adjoined
+	let start_command = document.getElementById("start_command").value.replaceAll(/\n*/, "&&").replaceAll("\s+", " ");
 	let env = {}; 
 	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
 		env[key] = value;	

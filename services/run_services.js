@@ -26,8 +26,8 @@ const processes = new Map();
 
 // Start a process
 function startProcess(service) {
-	const {run_command, path, service_name : name, env} = service	
-  
+	let {run_command, path, service_name : name, env} = service	
+	
 	const proc = spawn(run_command, {cwd : path, stdio: 'pipe', shell : true , env : {
 		...process.env,
 		...env
