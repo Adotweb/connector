@@ -1,12 +1,6 @@
 const { contextBridge, ipcRenderer, shell, clipboard } = require('electron')
 
-contextBridge.exposeInMainWorld('versions', {
-  node: () => process.versions.node,
-  chrome: () => process.versions.chrome,
-  electron: () => process.versions.electron
-  // we can also expose variables, not just functions
-})
-
+//exposes all the service functions registered to the frontend
 contextBridge.exposeInMainWorld("services", {
 	download_repo : (msg) => ipcRenderer.invoke("download_repo", msg),
 	run_service : (msg) => ipcRenderer.invoke("run_service", msg),
@@ -19,6 +13,8 @@ contextBridge.exposeInMainWorld("services", {
 	
 })
 
+
+//exposes the "get_host_id" function to the frontend
 contextBridge.exposeInMainWorld("host", {
 	get_host_id : () => ipcRenderer.invoke("get_host_id"),
 	

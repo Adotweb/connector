@@ -1,7 +1,7 @@
 const { app, BrowserWindow, shell, ipcMain } = require('electron')
+//all imports of self defined functions
 
 const { uniqueNamesGenerator, adjectives, colors, animals} = require("unique-names-generator")
-
 const fs = require("fs")
 const { userDataPath } = require("./services/services.js")
 
@@ -26,7 +26,7 @@ function check_app_folders(){
 	})
 }
 
-
+//this launches the app
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 1000,
@@ -36,41 +36,47 @@ const createWindow = () => {
 		preload : path.join(__dirname, "preload.js"),
 		
 	  },
+	  //hides the bar that says "file | view" etc.
 	  titleBarStyle : "hidden"
 		
   })
 
-
+	//expose the pages/index.html file for the frontend
   win.loadFile('./pages/index.html')
 }
 
-
+//before we quit the app we want to run some cleanup
 app.on("before-quit", (e) => {
+	//we prevent the next steps (actually closing the app)
+	//until we are done with the cleanup
 	e.preventDefault()	
 
-	//this runs cleanup
+	//this gets all services and stops the processes behind them
 	let process_names = [...processes.keys()]
 	process_names.forEach(p => {
 		console.log(p)
 		stopProcess(p)
 	})
 
-	//we wait a bit so that cleanup is clean
+	//we wait a bit so that cleanup is done
 	setTimeout(() => {
-		console.log(processes)
 
+		//this creates  JSON object of all our services so we can store it and refire it when we open the app again
 		let file = JSON.stringify([...services.values()])
-		console.log(file)
 		fs.writeFileSync(path.join(userDataPath, "services", "services.json"), file, "utf8")
 
+		//then we exit the app
 		app.exit()
 	}, 1000)
 })
 
 app.whenReady().then(() => {
-
+	
+	//starts the connection to the relay server
 	start_ws()
 
+	//function above
 	check_app_folders()
+	//start app
   	createWindow()
 })
