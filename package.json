@@ -1,7 +1,7 @@
 {
   "name": "connector",
   "version": "1.0.0",
-  "description": "",
+  "description": "A relay for your Apps!",
   "main": "main.js",
   "scripts": {
     "build:css": "npx postcss styles/input.css -o dist/output.css",
