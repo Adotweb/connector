@@ -2,14 +2,15 @@ let host_id;
 
 document.addEventListener("DOMContentLoaded", async e => {
 
-	//toggle_service_creator_popup()
-	
+	//get the host_id so we can display it	
 	host_id = await host.get_host_id();	
 
 	document.getElementById("host_id").innerHTML = host_id; 
 })
 
 
+//this method is used when we get a message in the creation process
+//it just takes the message and puts it into the bar on the right
 function create_success_status_message(msg){
 	let message = document.createElement("div")
 	document.getElementById("status_window").appendChild(message)
@@ -23,6 +24,7 @@ function create_success_status_message(msg){
 
 }
 
+//similar for errors
 function create_error_status_message(msg){
 	let message = document.createElement("div")
 
@@ -39,24 +41,36 @@ function create_error_status_message(msg){
 //this is the method that actually creates the service, but first it checks if the things mentioned even make sense (i.e. if the github url is valied etc.)
 async function create_service(){
 
+
+	//we change the button so it cannot do anything and shows three dots to show something is happening
 	let button = document.getElementById("create-button")
 	button.innerHTML = "..."
 	button.onclick = () => {}
 
+	//in case we edited before we want to make the input writable
+	document.getElementById("service_name").removeAttribute("readonly");
+	//we get the service name and the repo we want to pull from
 	let service_name = document.getElementById("service_name").value;
 	let github_url = document.getElementById("github_url").value;
 
 	//split into owner and repo 
+	//the filter is so that we dont get artifacts
 	let [owner, repo] = github_url.split("/").filter(s => s!= "")
 
+	//this will be the port that the relay will try to hit when a request comes in
 	let inward_port = document.getElementById("inward_port").value;
 	//in the start command we replace all newlines with && so that commands are adjoined
 	let start_command = document.getElementById("start_command").value.replaceAll(/\n*/, "&&").replaceAll("\s+", " ");
+
+	//we prepare an object that we can write to
 	let env = {}; 
+	//we split the text into lines of the form KEY=VALUE and split them into [KEY, VALUE], so we can write them to the above object
 	document.getElementById("env_variables").value.replaceAll("\n+", "\n").split("\n").map(line => line.split("=").filter(s => s!="")).forEach(([key, value]) => {
 		env[key] = value;	
 	});
 
+
+	//we check if the repo exists and throw (and show) an error when it doesnt
 	let github_check = await fetch("https://github.com/" + github_url).then(res => {
 		if(res.status == 404){
 			return res.status
@@ -69,12 +83,14 @@ async function create_service(){
 		return
 	}
 
-
+	//else we show success
 	create_success_status_message(`found repo ${github_url}`)		
 
+
+	//we try to download the repo in the backend
 	let { success, data } = await services.download_repo({owner, repo})
 	
-
+	//if this fails somehow we show that something has failed
 	if(!success){
 		create_error_status_message("something went wrong with this repo")
 		return
@@ -84,6 +100,8 @@ async function create_service(){
 
 	create_success_status_message(`successfully installed ${github_url}`)
 
+
+	//after we run the new service with all its data
 	let {success : new_success, data : new_data} = await services.run_new_service({
 		path, 
 		name : service_name, 
@@ -94,7 +112,8 @@ async function create_service(){
 		env 
 	})
 
-	//after all of this we are done
+
+	//we are done and close the creator popup
 	toggle_service_creator_popup()
 }
 
@@ -105,11 +124,16 @@ async function edit_service(service_ref){
 	button.innerHTML = "..."
 	button.onclick = () => {}
 
-	let service_name = document.getElementById("service_name").value;
+	//we dont use service_name because it cannot be changed, but have to make it readonly	
+	document.getElementById("service_name").setAttribute("readonly");
+
+	//everything else stays the same, except for the last part
+
 	let github_url = document.getElementById("github_url").value;
 
 	//split into owner and repo 
 	let [owner, repo] = github_url.split("/").filter(s => s!= "")
+
 
 	let inward_port = document.getElementById("inward_port").value;
 	let start_command = document.getElementById("start_command").value.replaceAll("\n*", "&&").replaceAll("\s+", " ");
@@ -146,7 +170,7 @@ async function edit_service(service_ref){
 	create_success_status_message(`successfully installed ${github_url}`)
 
 
-
+	//instead of running the service, we edit the service, this uses the already registered service, but fills in new information, this way the logs will be preservered
 	let {success : new_success, data : new_data} = await services.edit_service({
 		//we provide the reference here
 		service_name : service_ref,
@@ -169,31 +193,40 @@ async function edit_service(service_ref){
 }
 
 
-
+//self explanatory
 async function delete_cached_service(service_name){
 	let result = await services.delete_service(service_objects.get(service_name))
 	toggle_service_dashboard(service_name);
 }
 
 
+//self explanatory
 async function edit_cached_service(service_name){
 	toggle_service_dashboard(service_name)
 	toggle_service_creator_popup(service_objects.get(service_name))
 }
 
-
+//a variable that indicates if the creator popup is open
 let popup_open = false;
+
+//if the editing_service variable is given, we know that we are editing and can put in preset values (this way we dont have to fill all of them in again)
 function toggle_service_creator_popup(editing_service){
 
-	
+	//we want the same function to toggle instead of having to seperate functions	
 	popup_open = !popup_open;
 
+	//get a reference to the handle in the DOM
 	let popup = document.getElementById("popup")
+
+	//check if we are currently opening the popup
 	if(popup_open){
 
-
+		//all comments are made here because i cannot write them inside,
+		//all of the code below is for the creator popup and uses a lot of tailwind classes for style
 		//this is a popup that opens once we want to create a new service
 		//we need to use stopPropagation so that the child element does not trigger the toggle function
+		//
+
 		popup.outerHTML = `
 			<div id="popup" class="absolute z-15 w-[100vw] h-[100vh] p-10 flex justify-center  items-center " 
 			style="background-color : #000000AE"
@@ -254,6 +287,7 @@ function toggle_service_creator_popup(editing_service){
 						
 		}
 	}else{
+		//if we are not opening (i.e. closing) we want to make the popup handle contain nothing again
 		popup.outerHTML = `<div class="hidden" id="popup"></div>`		
 	}
 
@@ -261,8 +295,10 @@ function toggle_service_creator_popup(editing_service){
 }
 
 
-
+//this works similar but for a different popup
 let service_popup_open = false;
+
+//we provide the service name so we can see what service were looking at
 function toggle_service_dashboard(service_name){
 
 	let service = service_objects.get(service_name)
@@ -335,12 +371,14 @@ function toggle_service_dashboard(service_name){
 	
 }
 
+//this runs a service that is already registered
 async function run_cached_service(service_name){
 	let service = service_objects.get(service_name);
 	await services.run_service(service);
 	toggle_service_dashboard(service_name)
 }
 
+//this stops a service that is already registered
 async function stop_cached_service(service_name){
 	let service = service_objects.get(service_name);
 	await services.stop_service(service);
@@ -348,36 +386,41 @@ async function stop_cached_service(service_name){
 }
 
 
-//this opens stuff in the regular browser
-function copy_to_clipboard(link){
-	console.log(link)
-	host.copy_to_clipboard(link)	
-}
 
+//this is where we store the service objects so we can reference them in toggle and when showing the service dashboard popup
 let service_objects = new Map();
 
 
 //we poll the status over time so we are updated (event based is not needed here)
 setInterval(async () => {
 
+
+	//first we get all services registered in the backend
 	let all_services = await services.get_services()
 
 	console.log(all_services)
 	
-	//the deleted ones are those that do not come with the all_services call
-	
-	
+	//the deleted ones are those that do not come with the all_services call	
 	let deleted = [...service_objects.keys()].filter(name => !all_services.map(service => service.service_name).includes(name))
 
+	//we then also remove the deleted ones from the DOM
 	deleted.forEach(name => {
+		//we delete from the service_objects set
 		service_objects.delete(name)
+		//and from the DOM
 		document.getElementById(name).outerHTML = ""
 	})
-	
+
+
+	//a reference to the DOM
 	let service_list = document.getElementById("service-list")	
-	
+
+
+	//for all services left we check if they are updated
 	all_services.forEach((service, index) => {
 
+		//we precompute this element because we need it at multiple points later (two cases)
+		//it just shows information (running status etc.) of a given service and sets a handle so we can access it later
 		let element = `
 			<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4  wrap-anywhere ">				
 				<div class="title text-xl font-bold">${service.service_name}</div>
@@ -406,38 +449,37 @@ setInterval(async () => {
 		`
 
 
-		//we update the logs of the current thing were vewing (if it exists)
-
+		//we update the logs of the current thing were vewing (if it is currently opened in the dashboard, i.e. when we are looking at service-x this puts the logs in practically real-time into the dashboard logs-window)
 		let logs = document.getElementById(service.service_name + "-logs")
-
 		if(logs){
 			//updates the logs
 			logs.innerHTML = service.logs;		
-			
-
+		
 		}
 
-		//for all objects we already have we check if they have changed and if they have modify them, if not we return and move on
+		//for all objects we already have cached we check if they have changed and if they have modify them, if not we return and move on
 		if(service_objects.has(service.service_name)){
+			//if nothing has changed we just return and move on with the next object
 			if(JSON.stringify(service_objects.get(service.service_name)) == JSON.stringify(service)){
 				return	
 			}else{
+				//if something has changed we put the element into the dashboard and move on
 				let service_object = document.getElementById(service.service_name);
 				service_object.outerHTML = element
 				return
-
 			}
 		}
 
-		//for all new objects we create a new card and append it
+		//for all new (this means yet uncached) objects we create a new card and append it
 		let service_object = document.createElement("div");
+		//we need to first append because we cannot set outerHTML if we dont
 		service_list.appendChild(service_object);
-
-		service_object.outerHTML = element
-				
+		service_object.outerHTML = element		
 	})
 
 
-	
+	//then we copy the services we got from the update to service_objects	
 	all_services.forEach((service) => service_objects.set(service.service_name, service))
+
+	//we repeat this every second so everything stays in sink and is nice and tidy
 }, 1_000)
