@@ -14,16 +14,21 @@
 
 		<div class="font-bold text-3xl p-4">Dashboard for Host <div id="host_id"></div></div>
 
-		<div class="services w-full h-full grid grid-cols-3 gap-4 grid-rows-2 " id="service-list">
+		<div class="flex justify-center w-full">
+			
+			<div onclick="toggle_service_creator_popup()" class=" rounded drop-shadow-xl w-[40%] bg-white flex items-center  justify-center flex-col p-4 ">				
+				<div class="title text-xl font-bold pt-8">New service</div>	
+				<div class="title text-3xl font-bold pb-8">+</div>	
+			</div>	
+		</div>
+
+
+		<div class="services w-full h-full grid grid-cols-2 gap-4 p-4" id="service-list">
 		
 			
 
 
 			
-			<div onclick="toggle_service_creator_popup()" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center  justify-center flex-col p-4 ">				
-				<div class="title text-xl font-bold pt-8">New service</div>	
-				<div class="title text-3xl font-bold pb-8">+</div>	
-			</div>	
 
 		</div>
 

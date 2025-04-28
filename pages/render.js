@@ -195,12 +195,12 @@ function toggle_service_creator_popup(editing_service){
 		//this is a popup that opens once we want to create a new service
 		//we need to use stopPropagation so that the child element does not trigger the toggle function
 		popup.outerHTML = `
-			<div id="popup" class="absolute z-15 w-[100vw] h-[100vh] p-10 flex justify-center items-center" 
+			<div id="popup" class="absolute z-15 w-[100vw] h-[100vh] p-10 flex justify-center  items-center " 
 			style="background-color : #000000AE"
 			onclick="toggle_service_creator_popup(this)">
 				
 				<div onclick="event.stopPropagation()" 
-				class="z-20 w-3/5  bg-white flex flex-col items-center items-center  gap-4 rounded p-8">
+				class="z-20 w-3/5  bg-white flex flex-col items-center items-center max-h-[90%]  gap-4 rounded p-8 overflow-y-scroll">
 					<div class="font-bold text-3xl w-full">New Service</div>	
 				
 
@@ -284,7 +284,7 @@ function toggle_service_dashboard(service_name){
 			onclick="toggle_service_dashboard(this)">
 				
 				<div onclick="event.stopPropagation()" 
-				class="z-20 w-3/5  bg-white flex flex-col items-start   gap-4 rounded p-8">
+				class="z-20 w-3/5  bg-white flex flex-col  max-w-800px items-start   gap-4 rounded p-8 max-h-[90%] overflow-scroll">
 					<div class="title font-bold text-xl">${service.service_name}</div>
 					<div class="status font-bold text-lg">Status : ${service.running ? "Running" : "Stopped"}</div>
 					<div class="port font-bold text-lg">Inward Port : ${service.inward_port}</div>
@@ -297,7 +297,7 @@ function toggle_service_dashboard(service_name){
 					<textarea id="${service.service_name}-logs" 
 						value="${service.logs}"
 							name="start_command" rows="8" resize="false"
-							class="outline-none bg-gray-300 rounded-lg px-4 py-2 w-full"></textarea>	
+							class="outline-none bg-gray-300 rounded-lg px-4 py-2 w-full min-h-[400px]"></textarea>	
 
 					
 					
@@ -379,24 +379,21 @@ setInterval(async () => {
 	all_services.forEach((service, index) => {
 
 		let element = `
-			<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4 ">				
+			<div id="${service.service_name}" class="hello w-full h-min rounded drop-shadow-xl bg-white flex items-center flex-col p-4  wrap-anywhere ">				
 				<div class="title text-xl font-bold">${service.service_name}</div>
-				<div class="content  text-lg flex flex-col items-center p-4">
+				<div class="content  text-lg flex flex-col items-center pb-4">
 					<div class="flex">Status : ${service.running ? `<div class="font-bold text-green-400 ml-2">running</div>` : `<div class="font-bold text-red-400 ml-2">stopped</div>`}
 					</div>
 				<div class="flex">Listening on Port: <div class="font-bold ml-w">${service.inward_port}</div></div>					
 					
-				<div class="flex">URL : 
-		<div class="font-bold text-green-400 ml-2">https://connector.neptunapp.org/${host_id}/${service.service_name}</div>
-
-			</div>
+				<div class="font-bold text-green-400 ml-2 w-full  ">https://connector.neptunapp.org/${host_id}/${service.service_name}</div>
 					
 				</div>
 
-				<div class="flex p-4">
+				<div class="flex p-4 w-full justify-center">
 							<button onclick="toggle_service_dashboard('${service.service_name}')" 
-							class="bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
-							p-1 font-bold text-lg rounded">
+							class="w-[60%] bg-black text-white border-white border-2 hover:border-black hover:bg-white hover:text-black transition duration-150 
+							p-1 font-bold text-lg rounded-md">
 				
 								Service Dashboard
 							</button>
